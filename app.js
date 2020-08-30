@@ -73,7 +73,10 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions));
+let kktp=app.use(cors(corsOptions));
+console.log("############");
+console.log(kktp);
+console.log("############");
 
 app.use(bodyparser.raw());
 app.use(bodyparser.urlencoded({ extended: true }));
