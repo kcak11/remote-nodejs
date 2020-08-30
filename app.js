@@ -1,10 +1,10 @@
-const fs = global.require("fs");
-const express = global.require('express');
-const querystring = global.require('querystring');
-const path = global.require('path');
-const https = global.require('https');
-const cors = global.require('cors');
-const axios = global.require('axios');
+const fs = require("fs");
+const express = require('express');
+const querystring = require('querystring');
+const path = require('path');
+const https = require('https');
+const cors = require('cors');
+const axios = require('axios');
 const app = express();
 
 const bodyparser = require('body-parser');
