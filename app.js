@@ -23,3 +23,10 @@ const clientSecret = process.env.CLIENT_SECRET || "299d9c4c-23d2-4f00-bbb1-34920
 const allowedOrigin = process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN.trim() : '';
 
 let properEnvSet = true;
+
+function checkEnvironmentVariable(variableName, variableValue) {
+  if (!variableValue) {
+    console.log(`ERROR: Missing environment variable ${variableName}`);
+    properEnvSet = false;
+  }
+}
