@@ -72,3 +72,5 @@ const corsOptions = {
   allowedHeaders: "*",
   optionsSuccessStatus: 200
 };
+
+app.use(cors(corsOptions));
