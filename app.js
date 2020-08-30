@@ -5,7 +5,7 @@ const path = require('path');
 const https = require('https');
 const cors = require('cors');
 const axios = require('axios');
-const app = express();
+const myapp = express();
 
 const bodyparser = require('body-parser');
 
@@ -73,21 +73,21 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions));
+myapp.use(cors(corsOptions));
 
-app.use(bodyparser.raw());
-app.use(bodyparser.urlencoded({ extended: true }));
-app.use(bodyparser.json());
+myapp.use(bodyparser.raw());
+myapp.use(bodyparser.urlencoded({ extended: true }));
+myapp.use(bodyparser.json());
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
 const staticPath = path.join(__dirname, "/adminconsole");
 
-app.get(`${basePath}/health/liveness`, (req, res) => {
+myapp.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
 });
 
-app.get(`${basePath}/health/readiness`, (req, res) => {
+myapp.get(`${basePath}/health/readiness`, (req, res) => {
   res.sendStatus(200);
 });
 
@@ -98,8 +98,8 @@ function getUrls(req, res) {
   res.status(200);
   res.json(respData);
 }
-app.get(`${basePath}/urls`, getUrls);
-app.get(`/default/ui/v1${basePath}/urls`, getUrls);
+myapp.get(`${basePath}/urls`, getUrls);
+myapp.get(`/default/ui/v1${basePath}/urls`, getUrls);
 
 function getToken(req, res) {
   let referrer = req.header("referer") || "";
@@ -167,15 +167,15 @@ function getToken(req, res) {
   });
 }
 
-app.get(`${basePath}/token`, getToken);
-app.post(`${basePath}/token`, getToken);
+myapp.get(`${basePath}/token`, getToken);
+myapp.post(`${basePath}/token`, getToken);
 
-app.get(`/default/ui/v1${basePath}/token`, getToken);
-app.post(`/default/ui/v1${basePath}/token`, getToken);
+myapp.get(`/default/ui/v1${basePath}/token`, getToken);
+myapp.post(`/default/ui/v1${basePath}/token`, getToken);
 
-app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
-app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
+myapp.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
+myapp.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
-//module.exports = app;
+//module.exports = myapp;
 
 const kktp=function(){};
