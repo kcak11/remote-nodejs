@@ -73,10 +73,7 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-let kktp=app.use(cors(corsOptions));
-console.log("############");
-console.log(kktp);
-console.log("############");
+app.use(cors(corsOptions));
 
 app.use(bodyparser.raw());
 app.use(bodyparser.urlencoded({ extended: true }));
@@ -180,3 +177,5 @@ app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
 module.exports = app;
+
+((function(){return "Ashish Kumar";})());
