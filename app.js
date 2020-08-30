@@ -177,5 +177,3 @@ app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
 module.exports = app;
-
-((function(){return app;})());
