@@ -85,3 +85,5 @@ const staticPath = path.join(__dirname, "/adminconsole");
 app.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
 });
+
+module.exports = app;
