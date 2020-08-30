@@ -74,3 +74,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(bodyparser.raw());
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json());
