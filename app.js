@@ -93,7 +93,7 @@ app.get(`${basePath}/health/readiness`, (req, res) => {
 
 function getUrls(req, res) {
   let respData = {};
-  respData["debugging_mode"]="true";
+  respData["debugging_mode"] = "true";
   respData["apiUrl"] = "https://" + sspHost.trim() + "/default/";
   respData["authorizeUrl"] = "https://" + sspHost.trim() + "/default/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
   res.status(200);
