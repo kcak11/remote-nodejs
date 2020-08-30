@@ -81,7 +81,7 @@ app.use(bodyparser.json());
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
-const staticPath = path.join(__dirname, "/adminconsole");
+const staticPath = path.join(__dirname, "/server/adminconsole");
 
 console.log("The staticPath: ", staticPath);
 
