@@ -176,10 +176,4 @@ app.post(`/default/ui/v1${basePath}/token`, getToken);
 app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
-module.exports = app;
-
-let ashish="kumar";
-
-
-
-
+//module.exports = app;
