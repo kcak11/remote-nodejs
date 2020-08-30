@@ -75,4 +75,105 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-((function(){return "Ashish Kumar";})());
+app.use(bodyparser.raw());
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json());
+
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+const basePath = "/adminconsole";
+const staticPath = path.join(__dirname, "/adminconsole");
+
+app.get(`${basePath}/health/liveness`, (req, res) => {
+  res.sendStatus(200);
+});
+
+app.get(`${basePath}/health/readiness`, (req, res) => {
+  res.sendStatus(200);
+});
+
+function getUrls(req, res) {
+  let respData = {};
+  respData["apiUrl"] = "https://" + sspHost.trim() + "/default/";
+  respData["authorizeUrl"] = "https://" + sspHost.trim() + "/default/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
+  res.status(200);
+  res.json(respData);
+}
+app.get(`${basePath}/urls`, getUrls);
+app.get(`/default/ui/v1${basePath}/urls`, getUrls);
+
+function getToken(req, res) {
+  let referrer = req.header("referer") || "";
+  if (!isDevelopment && !referrer.startsWith(`https://${sspHost.trim()}`)) {
+    res.status(400);
+    res.json({ "error": "Unauthorized Client" });
+    return;
+  }
+
+  let data = {
+    "grant_type": "client_credentials",
+    "scope": "urn:iam:myscopes"
+  }
+
+  if (req.body.type === "code" && req.body.code) {
+    data = {
+      "grant_type": "authorization_code",
+      "scope": "urn:iam:myscopes",
+      "code": req.body.code,
+      "code_verifier": req.body.code_verifier
+    };
+  }
+
+  let port = sspPort ? ":" + sspPort : "";
+  let url;
+  if (isDevelopment) {
+    url = `https://${sspHost.trim()}${port.trim()}/default/`;
+  } else {
+    url = `${azSvc.trim()}/`;
+  }
+  let requestUrl = `${url}oauth2/v1/token`;
+
+  const post_data = querystring.stringify(data);
+  const authKey = Buffer.from(`${clientID.trim()}:${clientSecret.trim()}`).toString('base64');
+
+  let requestConfig = {
+    method: 'post',
+    url: requestUrl,
+    data: post_data,
+    headers: {
+      "Authorization": "Basic " + authKey,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    httpsAgent: httpsAgent
+  };
+
+  if (req.body && req.body.type === "code") {
+    /**
+     * This header is needed only when we use the AdminConsole clientID & clientSecret for addressing the cross-tenancy issues.
+     * It is not needed when using the SystemConsole clientID & clientSecret
+     */
+    requestConfig.headers["x-client-tenant-name"] = "system";
+  }
+
+  requestConfig.headers["X-Tenant-name"] = "default";
+  requestConfig.headers["x-client-tenant-name"] = "system";
+
+  axios(requestConfig).then(function (response) {
+    res.status(response.status || 200);
+    res.json(response.data);
+  }).catch(function (err) {
+    res.status(err.status || 500);
+    res.end("An error occured");
+    console.log(err);
+  });
+}
+
+app.get(`${basePath}/token`, getToken);
+app.post(`${basePath}/token`, getToken);
+
+app.get(`/default/ui/v1${basePath}/token`, getToken);
+app.post(`/default/ui/v1${basePath}/token`, getToken);
+
+app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
+app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
+
+module.exports = app;
