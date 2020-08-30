@@ -83,6 +83,8 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
 const staticPath = path.join(__dirname, "/adminconsole");
 
+console.log("The staticPath: ", staticPath);
+
 app.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
 });
