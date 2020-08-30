@@ -77,3 +77,11 @@ app.use(cors(corsOptions));
 app.use(bodyparser.raw());
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
+
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+const basePath = "/adminconsole";
+const staticPath = path.join(__dirname, "/adminconsole");
+
+app.get(`${basePath}/health/liveness`, (req, res) => {
+  res.sendStatus(200);
+});
