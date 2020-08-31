@@ -126,7 +126,7 @@ function getToken(req, res) {
 
   let port = sspPort ? ":" + sspPort : "";
   let url;
-  if (true || isDevelopment) {
+  if (isDevelopment) {
     url = `https://${sspHost.trim()}${port.trim()}/default/`;
   } else {
     url = `${azSvc.trim()}/`;
