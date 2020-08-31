@@ -178,3 +178,4 @@ app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
 module.exports = app;
+/* tag:99t8s9fj3o8tye93oj3o883hf */
