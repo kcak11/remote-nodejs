@@ -83,7 +83,7 @@ app.use(bodyparser.json());
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
-const staticPath = path.join(__dirname, "/adminconsole");
+const staticPath = path.join(__dirname, "server/adminconsole");
 
 app.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
