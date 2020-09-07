@@ -5,7 +5,7 @@ const path = require('path');
 const https = require('https');
 const cors = require('cors');
 const axios = require('axios');
-const app = express();
+const app = express();;
 
 const bodyparser = require('body-parser');
 
