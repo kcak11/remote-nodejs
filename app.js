@@ -31,7 +31,9 @@ function checkEnvironmentVariable(variableName, variableValue) {
   }
 }
 
-checkEnvironmentVariable("SSP_HOST", sspHost);
+if (isDevelopment) {
+  checkEnvironmentVariable("SSP_HOST", sspHost);
+}
 if (!isDevelopment) {
   checkEnvironmentVariable("AZ_SVC", azSvc);
 }
@@ -81,7 +83,7 @@ app.use(bodyparser.json());
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
-const staticPath = path.join(__dirname, "/server/adminconsole");
+const staticPath = path.join(__dirname, "/adminconsole");
 
 app.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
@@ -92,10 +94,18 @@ app.get(`${basePath}/health/readiness`, (req, res) => {
 });
 
 function getUrls(req, res) {
+  let host = req.header("Host");
+  if (isDevelopment) {
+    host = req.header("X-SSP-HOST") || sspHost.trim();
+  }
+  let tenantName = "default"; //TODO req.header("X-TENANT-NAME");
+  if (isDevelopment && !tenantName) {
+    tenantName = "default";
+  }
+
   let respData = {};
-  respData["debugging_mode"] = "true";
-  respData["apiUrl"] = "https://" + sspHost.trim() + "/default/";
-  respData["authorizeUrl"] = "https://" + sspHost.trim() + "/default/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
+  respData["apiUrl"] = "https://" + host.trim() + "/default/";
+  respData["authorizeUrl"] = "https://" + host.trim() + "/default/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
   res.status(200);
   res.json(respData);
 }
@@ -103,8 +113,17 @@ app.get(`${basePath}/urls`, getUrls);
 app.get(`/default/ui/v1${basePath}/urls`, getUrls);
 
 function getToken(req, res) {
+  let host = req.header("Host");
+  if (isDevelopment) {
+    host = req.header("X-SSP-HOST") || sspHost.trim();
+  }
+  let tenantName = "default"; //TODO req.header("X-TENANT-NAME");
+  if (isDevelopment && !tenantName) {
+    tenantName = "default";
+  }
+
   let referrer = req.header("referer") || "";
-  if (!isDevelopment && !referrer.startsWith(`https://${sspHost.trim()}`)) {
+  if (!isDevelopment && !referrer.startsWith(`https://${host.trim()}`)) {
     res.status(400);
     res.json({ "error": "Unauthorized Client" });
     return;
@@ -127,7 +146,7 @@ function getToken(req, res) {
   let port = sspPort ? ":" + sspPort : "";
   let url;
   if (isDevelopment) {
-    url = `https://${sspHost.trim()}${port.trim()}/default/`;
+    url = `https://${host.trim()}/default/`;
   } else {
     url = `${azSvc.trim()}/`;
   }
@@ -155,8 +174,11 @@ function getToken(req, res) {
     requestConfig.headers["x-client-tenant-name"] = "system";
   }
 
-  requestConfig.headers["X-Tenant-name"] = "default";
-  requestConfig.headers["x-client-tenant-name"] = "system";
+  requestConfig.headers["X-TENANT-NAME"] = tenantName;
+  requestConfig.headers["x-client-tenant-name"] = "system";	    requestConfig.headers["x-client-tenant-name"] = "system";
+  requestConfig.headers["X-Forwarded-Proto"] = "https";
+  requestConfig.headers["X-Forwarded-Port"] = "443";
+  requestConfig.headers["Host"] = host;
 
   axios(requestConfig).then(function (response) {
     res.status(response.status || 200);
@@ -178,4 +200,3 @@ app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
 module.exports = app;
-/* tag:99t8s98wfj3op8tye93okj3o883hf */
