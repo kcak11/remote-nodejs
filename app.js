@@ -104,8 +104,8 @@ function getUrls(req, res) {
   }
 
   let respData = {};
-  respData["apiUrl"] = "https://" + host.trim() + "/default/";
-  respData["authorizeUrl"] = "https://" + host.trim() + "/default/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
+  respData["apiUrl"] = "https://" + host.trim() + "/" + tenantName + "/";
+  respData["authorizeUrl"] = "https://" + host.trim() + "/" + tenantName + "/oauth2/v1/authorize?scope=openid%20urn:iam:myscopes%20profile&client_id=" + clientID + "&response_type=code&X-CLIENT-TENANT-NAME=system";
   res.status(200);
   res.json(respData);
 }
@@ -146,7 +146,7 @@ function getToken(req, res) {
   let port = sspPort ? ":" + sspPort : "";
   let url;
   if (isDevelopment) {
-    url = `https://${host.trim()}/default/`;
+    url = `https://${host.trim()}/${tenantName}/`;
   } else {
     url = `${azSvc.trim()}/`;
   }
@@ -175,7 +175,7 @@ function getToken(req, res) {
   }
 
   requestConfig.headers["X-TENANT-NAME"] = tenantName;
-  requestConfig.headers["x-client-tenant-name"] = "system";	    requestConfig.headers["x-client-tenant-name"] = "system";
+  requestConfig.headers["x-client-tenant-name"] = "system";
   requestConfig.headers["X-Forwarded-Proto"] = "https";
   requestConfig.headers["X-Forwarded-Port"] = "443";
   requestConfig.headers["Host"] = host;
