@@ -5,6 +5,7 @@ const path = require('path');
 const https = require('https');
 const cors = require('cors');
 const axios = require('axios');
+const compression = require('compression');
 const app = express();
 
 const bodyparser = require('body-parser');
@@ -18,8 +19,8 @@ const isDevelopment = fs.existsSync('./angular.json');
 const azSvc = process.env.AZ_SVC;
 const sspHost = process.env.SSP_HOST;
 const sspPort = process.env.SSP_PORT || "";
-const clientID = process.env.CLIENT_ID || "5f0ac4dd-9f6e-4d6a-bd89-6a4075070e1a";
-const clientSecret = process.env.CLIENT_SECRET || "299d9c4c-23d2-4f00-bbb1-34920900b832";
+let clientID = process.env.CLIENT_ID;
+let clientSecret = process.env.CLIENT_SECRET;
 const allowedOrigin = process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN.trim() : '';
 
 let properEnvSet = true;
@@ -33,16 +34,27 @@ function checkEnvironmentVariable(variableName, variableValue) {
 
 if (isDevelopment) {
   checkEnvironmentVariable("SSP_HOST", sspHost);
+  checkEnvironmentVariable("CLIENT_ID", clientID);
+  checkEnvironmentVariable("CLIENT_SECRET", clientSecret);
 }
 if (!isDevelopment) {
   checkEnvironmentVariable("AZ_SVC", azSvc);
 }
-checkEnvironmentVariable("CLIENT_ID", clientID);
-checkEnvironmentVariable("CLIENT_SECRET", clientSecret);
 
 if (!properEnvSet) {
   console.log('\nPlease refer the project\'s README.md file for instructions on setting the required Environment Variables.');
   process.exit(1);
+}
+
+if (!isDevelopment) {
+  fs.readFile("/ui-pod-data/adminconsoleclient.json", function (err, data) {
+    if (err) {
+      process.exit(1);
+    }
+    const clientDetails = JSON.parse(data);
+    clientID = clientDetails.client_id;
+    clientSecret = clientDetails.client_secret;
+  });
 }
 
 let portValue = sspPort ? ":" + sspPort : "";
@@ -81,9 +93,11 @@ app.use(bodyparser.raw());
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 
+app.use(compression());
+
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 const basePath = "/adminconsole";
-const staticPath = path.join(__dirname, "server/adminconsole");
+const staticPath = path.join(__dirname, "/adminconsole");
 
 app.get(`${basePath}/health/liveness`, (req, res) => {
   res.sendStatus(200);
@@ -98,7 +112,7 @@ function getUrls(req, res) {
   if (isDevelopment) {
     host = req.header("X-SSP-HOST") || sspHost.trim();
   }
-  let tenantName = "default"; //TODO req.header("X-TENANT-NAME");
+  let tenantName = req.header("X-TENANT-NAME") || "default";
   if (isDevelopment && !tenantName) {
     tenantName = "default";
   }
@@ -117,7 +131,7 @@ function getToken(req, res) {
   if (isDevelopment) {
     host = req.header("X-SSP-HOST") || sspHost.trim();
   }
-  let tenantName = "default"; //TODO req.header("X-TENANT-NAME");
+  let tenantName = req.header("X-TENANT-NAME") || "default";
   if (isDevelopment && !tenantName) {
     tenantName = "default";
   }
@@ -137,7 +151,6 @@ function getToken(req, res) {
   if (req.body.type === "code" && req.body.code) {
     data = {
       "grant_type": "authorization_code",
-      "scope": "urn:iam:myscopes",
       "code": req.body.code,
       "code_verifier": req.body.code_verifier
     };
@@ -200,5 +213,3 @@ app.use(`${basePath}`, express.static(staticPath, { index: "index.html" }));
 app.use(`${basePath}/*`, express.static(staticPath, { index: "index.html" }));
 
 module.exports = app;
-
-/* tag:399fj93yw99ru979vsojfsljwr2929028026935035 */
